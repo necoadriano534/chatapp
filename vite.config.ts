@@ -14,11 +14,15 @@ function backendPlugin() {
           serverProcess.kill();
         }
         
-        serverProcess = spawn('npx', ['tsx', 'server/index.ts'], {
-          stdio: 'inherit',
-          shell: true,
-          env: { ...process.env, NODE_ENV: 'development' }
-        });
+        // Using spawn with explicit arguments array (safer than shell: true)
+        // The command and arguments are hardcoded, not user-provided
+        serverProcess = spawn(process.platform === 'win32' ? 'npx.cmd' : 'npx', 
+          ['tsx', 'server/index.ts'], 
+          {
+            stdio: 'inherit',
+            env: { ...process.env, NODE_ENV: 'development' }
+          }
+        );
 
         serverProcess.on('error', (err) => {
           console.error('Failed to start backend:', err);

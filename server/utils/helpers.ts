@@ -26,7 +26,31 @@ export function formatDate(date: Date): string {
   }).format(date);
 }
 
-// Sanitize user input
+// Sanitize user input - escapes HTML entities for safe display
 export function sanitizeInput(input: string): string {
-  return input.trim().replace(/[<>]/g, '');
+  return input
+    .trim()
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+// Validate email format
+export function isValidEmail(email: string): boolean {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
+// Validate that input doesn't contain potentially dangerous patterns
+export function isCleanInput(input: string): boolean {
+  // Check for common XSS patterns
+  const dangerousPatterns = [
+    /<script/i,
+    /javascript:/i,
+    /on\w+\s*=/i,
+    /data:/i
+  ];
+  return !dangerousPatterns.some(pattern => pattern.test(input));
 }

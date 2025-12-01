@@ -21,7 +21,10 @@ const rpName = process.env.WEBAUTHN_RP_NAME || 'ChatApp';
 const rpID = process.env.WEBAUTHN_RP_ID || 'localhost';
 const origin = process.env.WEBAUTHN_ORIGIN || 'http://localhost:5173';
 
-// Store challenges temporarily (in production, use Redis or similar)
+// Store challenges temporarily
+// WARNING: In-memory storage is only suitable for development
+// For production, use Redis or a database-backed session store
+// to handle multiple server instances and persistence across restarts
 const challenges = new Map<string, string>();
 
 // Get registration options

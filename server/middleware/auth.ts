@@ -4,7 +4,12 @@ import { db, users } from '../db';
 import { eq } from 'drizzle-orm';
 import logger from '../utils/logger';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key';
+// JWT secret - in production, this should always be set via environment variable
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET && process.env.NODE_ENV === 'production') {
+  throw new Error('JWT_SECRET environment variable is required in production');
+}
+const jwtSecret = JWT_SECRET || 'development-only-secret-do-not-use-in-production';
 
 export interface AuthRequest extends Request {
   user?: {
@@ -25,7 +30,7 @@ export async function authenticate(req: AuthRequest, res: Response, next: NextFu
     
     const token = authHeader.split(' ')[1];
     
-    const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
+    const decoded = jwt.verify(token, jwtSecret) as { userId: string };
     
     const [user] = await db
       .select({
@@ -66,7 +71,7 @@ export function requireRole(...roles: ('attendant' | 'client' | 'admin')[]) {
 export function generateToken(userId: string): string {
   return jwt.sign(
     { userId },
-    JWT_SECRET,
+    jwtSecret,
     { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
   );
 }

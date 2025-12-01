@@ -3,7 +3,12 @@ import { Server, Socket } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import logger from '../utils/logger';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key';
+// JWT secret - same validation as auth middleware
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET && process.env.NODE_ENV === 'production') {
+  throw new Error('JWT_SECRET environment variable is required in production');
+}
+const jwtSecret = JWT_SECRET || 'development-only-secret-do-not-use-in-production';
 
 interface AuthenticatedSocket extends Socket {
   user?: {
@@ -34,7 +39,7 @@ export function initializeSocket(httpServer: HttpServer) {
     }
 
     try {
-      const decoded = jwt.verify(token, JWT_SECRET) as {
+      const decoded = jwt.verify(token, jwtSecret) as {
         userId: string;
         email?: string;
         role?: 'attendant' | 'client' | 'admin';

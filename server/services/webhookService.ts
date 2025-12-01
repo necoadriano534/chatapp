@@ -56,9 +56,13 @@ async function getAuthHeaders(webhook: {
       headers[headerName] = config.apiKey as string || '';
       break;
     case 'Hawk':
-      // Hawk auth would require more complex implementation
-      // For now, add basic Hawk headers
-      headers['Authorization'] = `Hawk id="${config.id}", ts="${Date.now()}", nonce="${Math.random().toString(36)}"`;
+      // NOTE: Hawk authentication is not fully implemented
+      // This is a placeholder that sets basic headers but does not compute proper HMAC signatures
+      // For production use with Hawk auth, implement proper signature calculation
+      // or use a library like 'hawk' npm package
+      // See: https://github.com/mozilla/hawk
+      console.warn('Hawk authentication is not fully implemented - using placeholder headers');
+      headers['Authorization'] = `Hawk id="${config.id}", ts="${Math.floor(Date.now() / 1000)}", nonce="${Math.random().toString(36).substring(2)}"`;
       break;
   }
 
