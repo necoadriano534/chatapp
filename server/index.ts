@@ -27,6 +27,9 @@ initializeSocket(httpServer);
 
 // Middleware
 app.use(express.json());
+// Note: cookie-parser is included for potential future use, but authentication uses
+// JWT Bearer tokens in the Authorization header, which provides inherent CSRF protection.
+// No CSRF middleware is needed because tokens are not stored/sent in cookies.
 app.use(cookieParser());
 app.use(requestLogger);
 
