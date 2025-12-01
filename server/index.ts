@@ -3,6 +3,7 @@ import { createServer } from 'http';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import { requestLogger, errorHandler } from './middleware/requestLogger';
+import { apiLimiter, authLimiter, messageLimiter, webauthnLimiter } from './middleware/rateLimiter';
 import { initializeSocket } from './socket';
 import logger from './utils/logger';
 
@@ -29,16 +30,17 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(requestLogger);
 
-// API Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/users', usersRoutes);
-app.use('/api/conversations', conversationsRoutes);
-app.use('/api/messages', messagesRoutes);
-app.use('/api/channels', channelsRoutes);
-app.use('/api/webhooks', webhooksRoutes);
-app.use('/api/webauthn', webauthnRoutes);
+// Apply rate limiting
+// Note: In production with multiple instances, use a Redis store for rate limiting
+app.use('/api/auth', authLimiter, authRoutes);
+app.use('/api/users', apiLimiter, usersRoutes);
+app.use('/api/conversations', apiLimiter, conversationsRoutes);
+app.use('/api/messages', messageLimiter, messagesRoutes);
+app.use('/api/channels', apiLimiter, channelsRoutes);
+app.use('/api/webhooks', apiLimiter, webhooksRoutes);
+app.use('/api/webauthn', webauthnLimiter, webauthnRoutes);
 
-// Health check
+// Health check (no rate limiting)
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
